@@ -13,6 +13,8 @@ interface HealthFormData {
   medications: string
   allergies: string
   location: string
+  foodTypes: string[]
+  waterConsumption: string
 }
 
 const HealthForm: React.FC = () => {
@@ -27,7 +29,9 @@ const HealthForm: React.FC = () => {
     healthConditions: [],
     medications: '',
     allergies: '',
-    location: ''
+    location: '',
+    foodTypes: [],
+    waterConsumption: ''
   })
 
   const healthConditionsList = [
@@ -143,7 +147,9 @@ const HealthForm: React.FC = () => {
           gender: formData.gender,
           dietary_preference: formData.dietaryPreference,
           location: formData.location,
-          updated_at: new Date().toISOString()
+          updated_at: new Date().toISOString(),
+          food_types: formData.foodTypes,
+          water_consumption: formData.waterConsumption
         })
 
       if (profileError) throw profileError
@@ -276,6 +282,48 @@ const HealthForm: React.FC = () => {
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                   placeholder="City, State"
                 />
+              </div>
+            </div>
+            
+            {/* Food Types and Water Consumption */}
+            <div className="space-y-6">
+              <h3 className="text-lg font-semibold text-gray-900 flex items-center space-x-2">
+                <Utensils className="w-5 h-5 text-green-500" />
+                <span>Dietary Details</span>
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Type of Food Consumed</label>
+                  <div className="flex flex-wrap gap-2">
+                    {['Fruits', 'Vegetables', 'Grains', 'Protein', 'Dairy'].map(type => (
+                      <label key={type} className="flex items-center space-x-1">
+                        <input
+                          type="checkbox"
+                          value={type}
+                          checked={formData.foodTypes.includes(type)}
+                          onChange={e => {
+                            if (e.target.checked) setFormData(prev => ({ ...prev, foodTypes: [...prev.foodTypes, type] }))
+                            else setFormData(prev => ({ ...prev, foodTypes: prev.foodTypes.filter(t => t !== type) }))
+                          }}
+                          className="form-checkbox text-green-600"
+                        />
+                        <span>{type}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Water Consumption</label>
+                  <select
+                    className="border border-gray-300 rounded-lg px-2 py-1 text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-400"
+                    value={formData.waterConsumption}
+                    onChange={e => setFormData(prev => ({ ...prev, waterConsumption: e.target.value }))}
+                  >
+                    <option value="">Select</option>
+                    <option value="1-3 liters">1-3 liters</option>
+                    <option value="Above 3 liters">Above 3 liters</option>
+                  </select>
+                </div>
               </div>
             </div>
             
