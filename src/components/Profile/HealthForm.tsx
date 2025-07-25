@@ -166,19 +166,18 @@ const HealthForm: React.FC = () => {
 
       if (healthError) throw healthError
 
-      // Generate and save recommendations
-      const recommendations = generateRecommendations(formData)
-      
-      const { error: recError } = await supabase
-        .from('recommendations')
-        .insert({
-          user_id: user.id,
-          ...recommendations
-        })
+      // Generate and save recommendations (optional, can be removed if only using AI)
+      // const recommendations = generateRecommendations(formData)
+      // const { error: recError } = await supabase
+      //   .from('recommendations')
+      //   .insert({
+      //     user_id: user.id,
+      //     ...recommendations
+      //   })
+      // if (recError) throw recError
 
-      if (recError) throw recError
-
-      navigate('/recommendations')
+      // Redirect to recommendations page, which will now auto-trigger AI recommendation
+      navigate('/recommendations?autoAI=1')
     } catch (error) {
       console.error('Error saving data:', error)
     } finally {

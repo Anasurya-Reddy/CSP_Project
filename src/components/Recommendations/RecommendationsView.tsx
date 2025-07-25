@@ -175,9 +175,47 @@ const RecommendationsView: React.FC = () => {
           <div className="mb-4 p-4 bg-red-100 text-red-700 rounded-lg">{aiError}</div>
         )}
         {aiRecommendation && (
-          <div className="mb-4 p-4 bg-green-50 border border-green-200 rounded-lg">
-            <h2 className="text-lg font-bold mb-2 text-green-800">Gemini AI Recommendation</h2>
-            <div className="text-gray-900 whitespace-pre-line">{aiRecommendation}</div>
+          <div className="mb-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Recommended Foods Box */}
+            {(() => {
+              let output = aiRecommendation.replace(/Given the following user profile[\s\S]*?recommendations?\.?/i, '').trim();
+              output = output.replace(/Profile:.*|Condition details:.*|\{.*\}|\[.*\]/gi, '').trim();
+              const lines = output.split(/\n+/).map(line => line.trim()).filter(line => line.length > 0);
+              // Heuristics for recommended and not recommended foods
+              const recommended = lines.filter(line =>
+                /recommended|eat|include|consume|good|healthy|add|should have|increase/i.test(line) &&
+                !/avoid|not recommended|do not|should not|limit|restrict|bad|unhealthy/i.test(line)
+              );
+              const notRecommended = lines.filter(line =>
+                /avoid|not recommended|do not|should not|limit|restrict|bad|unhealthy/i.test(line)
+              );
+              return <>
+                <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                  <h3 className="text-green-800 font-bold mb-2">Recommended Foods</h3>
+                  {recommended.length > 0 ? (
+                    <ul className="list-disc pl-6 space-y-1">
+                      {recommended.map((line, idx) => (
+                        <li key={idx} className="text-green-900 font-semibold">{line}</li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <div className="text-gray-700">No recommended foods found.</div>
+                  )}
+                </div>
+                <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                  <h3 className="text-red-800 font-bold mb-2">Foods to Avoid</h3>
+                  {notRecommended.length > 0 ? (
+                    <ul className="list-disc pl-6 space-y-1">
+                      {notRecommended.map((line, idx) => (
+                        <li key={idx} className="text-red-900 font-semibold">{line}</li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <div className="text-gray-700">No foods to avoid found.</div>
+                  )}
+                </div>
+              </>;
+            })()}
           </div>
         )}
 

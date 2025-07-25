@@ -12,6 +12,11 @@ interface UserProfile {
   dietary_preference: string
   location: string | null
   created_at: string
+  food_types?: string[]
+  water_consumption?: string
+  medications?: string
+  allergies?: string
+  health_conditions?: string
 }
 
 interface RecommendationHistory {
@@ -155,25 +160,55 @@ const Dashboard: React.FC = () => {
               {profile ? (
                 <div className="space-y-4">
                   <div className="flex justify-between items-center">
-                    <span className="text-gray-600">Name:</span>
+                    <span className="text-gray-600">Full Name:</span>
                     <span className="font-medium">{profile.full_name}</span>
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="text-gray-600">Age:</span>
-                    <span className="font-medium">{profile.age} years</span>
+                    <span className="font-medium">{profile.age}</span>
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="text-gray-600">Gender:</span>
-                    <span className="font-medium capitalize">{profile.gender}</span>
+                    <span className="font-medium">{profile.gender}</span>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="text-gray-600">Diet:</span>
-                    <span className="font-medium capitalize">{profile.dietary_preference}</span>
+                    <span className="text-gray-600">Dietary Preference:</span>
+                    <span className="font-medium">{profile.dietary_preference}</span>
                   </div>
                   {profile.location && (
                     <div className="flex justify-between items-center">
                       <span className="text-gray-600">Location:</span>
                       <span className="font-medium">{profile.location}</span>
+                    </div>
+                  )}
+                  {profile.food_types && profile.food_types.length > 0 && (
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-600">Type of Food Consumed:</span>
+                      <span className="font-medium">{profile.food_types.join(', ')}</span>
+                    </div>
+                  )}
+                  {profile.water_consumption && (
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-600">Water Consumption:</span>
+                      <span className="font-medium">{profile.water_consumption}</span>
+                    </div>
+                  )}
+                  {profile.health_conditions && (
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-600">Health Conditions:</span>
+                      <span className="font-medium">{profile.health_conditions}</span>
+                    </div>
+                  )}
+                  {profile.medications && (
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-600">Medications:</span>
+                      <span className="font-medium">{profile.medications}</span>
+                    </div>
+                  )}
+                  {profile.allergies && (
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-600">Allergies:</span>
+                      <span className="font-medium">{profile.allergies}</span>
                     </div>
                   )}
                   <div className="pt-4 border-t border-gray-200">
