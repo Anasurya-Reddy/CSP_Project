@@ -1,6 +1,7 @@
 import React from 'react'
 import { User, LogOut, Heart } from 'lucide-react'
 import { useAuth } from '../../contexts/AuthContext'
+import { Link } from 'react-router-dom'
 
 const Header: React.FC = () => {
   const { user, signOut } = useAuth()
@@ -21,6 +22,12 @@ const Header: React.FC = () => {
           
           {user && (
             <div className="flex items-center space-x-4">
+              <Link
+                to="/"
+                className="px-3 py-2 text-green-700 hover:bg-green-50 rounded-lg transition-colors font-medium border border-green-200"
+              >
+                Home
+              </Link>
               <div className="flex items-center space-x-2">
                 <div className="bg-blue-100 p-1.5 rounded-full">
                   <User className="w-4 h-4 text-blue-600" />

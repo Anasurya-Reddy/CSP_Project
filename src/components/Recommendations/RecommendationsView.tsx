@@ -14,11 +14,17 @@ interface Recommendation {
   created_at: string
 }
 
+const GEMINI_API_KEY = 'AIzaSyALKwF1xqSx4QQJOrPdoujqbSsCCZiGuHY'; // Replace with your Gemini API key
+const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent';
+
 const RecommendationsView: React.FC = () => {
   const { user } = useAuth()
   const navigate = useNavigate()
   const [recommendations, setRecommendations] = useState<Recommendation | null>(null)
   const [loading, setLoading] = useState(true)
+  const [aiRecommendation, setAiRecommendation] = useState<string | null>(null);
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiError, setAiError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchRecommendations = async () => {
@@ -47,6 +53,64 @@ const RecommendationsView: React.FC = () => {
 
     fetchRecommendations()
   }, [user])
+
+  const handleGeminiRecommend = async () => {
+    setAiLoading(true);
+    setAiError(null);
+    setAiRecommendation(null);
+    try {
+      if (!user) throw new Error('User not found');
+      // Fetch the latest user profile
+      let { data: profile } = await supabase
+        .from('user_profiles')
+        .select('*')
+        .eq('user_id', user.id)
+        .single();
+      // If profile does not exist, create it with sensible defaults
+      if (!profile) {
+        const defaultProfile = {
+          user_id: user.id,
+          full_name: user.user_metadata?.full_name || 'Your Name',
+          age: 30,
+          gender: 'other',
+          dietary_preference: 'vegetarian',
+          location: '',
+          updated_at: new Date().toISOString(),
+        };
+        const { data: newProfile, error: upsertError } = await supabase
+          .from('user_profiles')
+          .upsert(defaultProfile)
+          .select()
+          .single();
+        if (upsertError) throw upsertError;
+        profile = newProfile;
+      } else {
+        // Always update the profile's updated_at field
+        await supabase
+          .from('user_profiles')
+          .upsert({
+            ...profile,
+            updated_at: new Date().toISOString()
+          });
+      }
+      const prompt = `Given the following user profile, provide personalized nutrition and health recommendations.\nProfile: ${JSON.stringify(profile)}`;
+      const body = {
+        contents: [{ parts: [{ text: prompt }] }]
+      };
+      const res = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+      if (!res.ok) throw new Error('Failed to fetch Gemini recommendation');
+      const data = await res.json();
+      setAiRecommendation(data?.candidates?.[0]?.content?.parts?.[0]?.text || 'No recommendation received.');
+    } catch (err: any) {
+      setAiError(err.message || 'Error fetching AI recommendation');
+    } finally {
+      setAiLoading(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -89,15 +153,33 @@ const RecommendationsView: React.FC = () => {
                 <span>Generated on {new Date(recommendations.created_at).toLocaleDateString()}</span>
               </p>
             </div>
-            <button
-              onClick={() => navigate('/profile')}
-              className="flex items-center space-x-2 bg-white border border-gray-300 px-4 py-2 rounded-lg hover:bg-gray-50 transition-colors"
-            >
-              <RefreshCw className="w-4 h-4" />
-              <span>Update Profile</span>
-            </button>
+            <div className="flex gap-2 items-center">
+              <button
+                onClick={handleGeminiRecommend}
+                className="flex items-center space-x-2 bg-gradient-to-r from-blue-500 to-green-500 text-white px-4 py-2 rounded-lg font-medium hover:from-blue-600 hover:to-green-600 transform hover:scale-105 transition-all duration-200"
+                disabled={aiLoading}
+              >
+                {aiLoading ? 'Getting AI Recommendation...' : 'Get AI Recommendations'}
+              </button>
+              <button
+                onClick={() => navigate('/profile')}
+                className="flex items-center space-x-2 bg-white border border-gray-300 px-4 py-2 rounded-lg hover:bg-gray-50 transition-colors"
+              >
+                <RefreshCw className="w-4 h-4" />
+                <span>Update Profile</span>
+              </button>
+            </div>
           </div>
         </div>
+        {aiError && (
+          <div className="mb-4 p-4 bg-red-100 text-red-700 rounded-lg">{aiError}</div>
+        )}
+        {aiRecommendation && (
+          <div className="mb-4 p-4 bg-green-50 border border-green-200 rounded-lg">
+            <h2 className="text-lg font-bold mb-2 text-green-800">Gemini AI Recommendation</h2>
+            <div className="text-gray-900 whitespace-pre-line">{aiRecommendation}</div>
+          </div>
+        )}
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Recommended Foods */}
