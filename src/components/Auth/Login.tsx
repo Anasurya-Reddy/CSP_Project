@@ -28,7 +28,7 @@ const Login: React.FC = () => {
     <div className="min-h-screen bg-gradient-to-br from-green-50 via-blue-50 to-orange-50 flex items-center justify-center px-4">
       <div className="max-w-md w-full bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
         <div className="bg-gradient-to-r from-green-500 to-blue-500 px-8 py-6">
-          <h2 className="text-2xl font-bold text-white text-center">Welcome Back</h2>
+          <h2 className="text-2xl font-bold text-white text-center">Welcome Back...</h2>
           <p className="text-green-100 text-center mt-2">Sign in to access your health recommendations</p>
         </div>
         
